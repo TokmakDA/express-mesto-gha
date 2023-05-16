@@ -2,12 +2,14 @@ const express = require('express');
 
 const mongoose = require('mongoose');
 const { userRouter, cardRouter } = require('./routes');
+const { ERROR_NOT_FOUND } = require('./utils/error');
 
 const app = express();
 const { PORT = 3000 } = process.env;
-const ERROR_NOT_FOUND = 404;
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
+mongoose.connect('mongodb://localhost:27017/mestodb').catch((err) => {
+  console.log(err);
+});
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -23,4 +25,6 @@ app.use('*', (req, res) => {
   res.status(ERROR_NOT_FOUND).send({ message: 'Fot found' });
 });
 
-app.listen(PORT, () => {});
+app.listen(PORT, () => {
+  console.log(`Start server, port:${PORT}`);
+});

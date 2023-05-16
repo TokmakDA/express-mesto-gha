@@ -1,28 +1,5 @@
 const User = require('../models/user');
-
-const ERROR_DEFAULT = 500;
-const ERROR_NOT_FOUND = 404;
-const ERROR_DATA = 400;
-
-function catchingError(req, res, e, userId) {
-  console.log('err =>', e);
-  if (e.message === 'Not found') {
-    res.status(ERROR_NOT_FOUND).send({ message: `${userId} User not found` });
-    console.log(`err ${ERROR_NOT_FOUND} =>`, e.message);
-  } else if (e.name === 'ValidationError') {
-    const message = Object.values(e.errors)
-      .map((error) => error.message)
-      .join('; ');
-    res.status(ERROR_DATA).send({ message });
-    console.log(`err ${ERROR_DATA} =>`, e.message);
-  } else if (e.name === 'CastError') {
-    res.status(ERROR_DATA).send({ message: `Incorrect user ID: ${userId}` });
-    console.log(`err ${ERROR_DATA} =>`, e.message);
-  } else {
-    res.status(ERROR_DEFAULT).send({ message: 'Swth went wrong' });
-    console.log(`err ${ERROR_DEFAULT} =>`, e.message);
-  }
-}
+const { catchingError } = require('../utils/error');
 
 //  GET /users — возвращает всех пользователей
 const getUsers = (req, res) => {
@@ -31,7 +8,7 @@ const getUsers = (req, res) => {
       res.status(200).send({ data: users });
     })
     .catch((e) => {
-      catchingError(res, e);
+      catchingError(req, res, e);
     });
 };
 
@@ -85,7 +62,7 @@ const patchUser = (req, res) => {
       res.send({ data: user });
     })
     .catch((e) => {
-      catchingError(req, res, e);
+      catchingError(req, res, e, userId);
     });
 };
 
@@ -109,7 +86,7 @@ const patchAvatar = (req, res) => {
       res.send({ data: user });
     })
     .catch((e) => {
-      catchingError(req, res, e);
+      catchingError(req, res, e, userId);
     });
 };
 

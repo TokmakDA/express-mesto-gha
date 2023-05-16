@@ -1,28 +1,5 @@
 const Card = require('../models/card');
-
-const ERROR_DEFAULT = 500;
-const ERROR_NOT_FOUND = 404;
-const ERROR_DATA = 400;
-
-function catchingError(req, res, e, cardId) {
-  console.log('err =>', e);
-  if (e.message === 'Not found') {
-    res.status(ERROR_NOT_FOUND).send({ message: `${cardId} Card not found` });
-    console.log(`err ${ERROR_NOT_FOUND} =>`, e.message);
-  } else if (e.name === 'ValidationError') {
-    const message = Object.values(e.errors)
-      .map((error) => error.message)
-      .join('; ');
-    res.status(ERROR_DATA).send({ message });
-    console.log(`err ${ERROR_DATA} =>`, e.message);
-  } else if (e.name === 'CastError') {
-    res.status(ERROR_DATA).send({ message: `Incorrect card ID: ${cardId}` });
-    console.log(`err ${ERROR_DATA} =>`, e.message);
-  } else {
-    res.status(ERROR_DEFAULT).send({ message: 'Swth went wrong' });
-    console.log(`err ${ERROR_DEFAULT} =>`, e.message);
-  }
-}
+const { catchingError } = require('../utils/error');
 
 //  GET /cards — возвращает все карточки
 const getCards = (req, res) => {
