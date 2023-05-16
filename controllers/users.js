@@ -2,7 +2,7 @@ const User = require('../models/user');
 
 function catchingError(req, res, e, userId) {
   console.log('err =>', e);
-  if (e?.message == 'Not found' || e?.name == 'CastError') {
+  if (e?.message == 'Not found') {
     res.status(404).send({ message: `${userId} User not found` });
     console.log('err 404 =>', e?.message);
   } else if (e?.name == 'ValidationError') {
@@ -10,6 +10,9 @@ function catchingError(req, res, e, userId) {
       .map((error) => error.message)
       .join('; ');
     res.status(400).send({ message });
+    console.log('err 400 =>', e?.message);
+  } else if (e?.name == 'CastError') {
+    res.status(400).send({ message: `Incorrect user ID: ${userId}` });
     console.log('err 400 =>', e?.message);
   } else {
     res.status(500).send({ message: 'Swth went wrong' });
