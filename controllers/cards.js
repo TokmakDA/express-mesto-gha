@@ -27,7 +27,7 @@ function catchingError(req, res, e, cardId) {
 //  GET /cards — возвращает все карточки
 const getCards = (req, res) => {
   Card.find()
-    .populate('owner')
+    .populate(['owner', 'likes'])
     .then((cards) => {
       res.status(200).send({ data: cards });
     })
@@ -42,6 +42,7 @@ const createCard = (req, res) => {
   const userId = req.user._id;
 
   Card.create({ name, link, owner: userId })
+    .then((card) => Card.findById(card._id).populate(['owner', 'likes']))
     .then((card) => {
       res.status(201).send({ data: card });
     })
@@ -54,6 +55,7 @@ const createCard = (req, res) => {
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
+    .populate(['owner', 'likes'])
     .orFail(() => {
       throw new Error('Not found');
     })
@@ -73,6 +75,7 @@ const addLikeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .orFail(() => {
       throw new Error('Not found');
     })
@@ -92,6 +95,7 @@ const deleteLikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
+    .populate(['owner', 'likes'])
     .orFail(() => {
       throw new Error('Not found');
     })
