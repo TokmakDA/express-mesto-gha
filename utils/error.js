@@ -2,7 +2,7 @@ const ERROR_DEFAULT = 500;
 const ERROR_NOT_FOUND = 404;
 const ERROR_DATA = 400;
 
-const catchingError = (req, res, e, id) => {
+const handleError = (req, res, e, id) => {
   console.log('err =>', e);
   if (e.message === 'Not found') {
     res.status(ERROR_NOT_FOUND).send({ message: `ID:${id} Data not found` });
@@ -26,5 +26,5 @@ module.exports = {
   ERROR_DEFAULT,
   ERROR_NOT_FOUND,
   ERROR_DATA,
-  catchingError,
+  handleError,
 };

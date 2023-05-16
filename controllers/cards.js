@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { catchingError } = require('../utils/error');
+const { handleError } = require('../utils/error');
 
 //  GET /cards — возвращает все карточки
 const getCards = (req, res) => {
@@ -9,7 +9,7 @@ const getCards = (req, res) => {
       res.status(200).send({ data: cards });
     })
     .catch((e) => {
-      catchingError(req, res, e);
+      handleError(req, res, e);
     });
 };
 
@@ -24,7 +24,7 @@ const createCard = (req, res) => {
       res.status(201).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e);
+      handleError(req, res, e);
     });
 };
 
@@ -40,7 +40,7 @@ const deleteCard = (req, res) => {
       res.status(200).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e, cardId);
+      handleError(req, res, e, cardId);
     });
 };
 
@@ -60,7 +60,7 @@ const addLikeCard = (req, res) => {
       res.status(200).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e, cardId);
+      handleError(req, res, e, cardId);
     });
 };
 
@@ -80,7 +80,7 @@ const deleteLikeCard = (req, res) => {
       res.status(200).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e, cardId);
+      handleError(req, res, e, cardId);
     });
 };
 

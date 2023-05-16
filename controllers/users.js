@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { catchingError } = require('../utils/error');
+const { handleError } = require('../utils/error');
 
 //  GET /users — возвращает всех пользователей
 const getUsers = (req, res) => {
@@ -8,7 +8,7 @@ const getUsers = (req, res) => {
       res.status(200).send({ data: users });
     })
     .catch((e) => {
-      catchingError(req, res, e);
+      handleError(req, res, e);
     });
 };
 
@@ -23,7 +23,7 @@ const getUser = (req, res) => {
       res.status(200).send({ data: user });
     })
     .catch((e) => {
-      catchingError(req, res, e, userId);
+      handleError(req, res, e, userId);
     });
 };
 
@@ -38,7 +38,7 @@ const createUser = (req, res) => {
       res.status(201).send({ data: user });
     })
     .catch((e) => {
-      catchingError(req, res, e);
+      handleError(req, res, e);
     });
 };
 
@@ -62,7 +62,7 @@ const patchUser = (req, res) => {
       res.send({ data: user });
     })
     .catch((e) => {
-      catchingError(req, res, e, userId);
+      handleError(req, res, e, userId);
     });
 };
 
@@ -86,7 +86,7 @@ const patchAvatar = (req, res) => {
       res.send({ data: user });
     })
     .catch((e) => {
-      catchingError(req, res, e, userId);
+      handleError(req, res, e, userId);
     });
 };
 
