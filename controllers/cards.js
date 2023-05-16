@@ -2,43 +2,38 @@ const Card = require('../models/card');
 
 function catchingError(req, res, e, cardId) {
   console.log('err =>', e);
-  if (e?.message == 'Not found') {
+  if (e.message === 'Not found') {
     res.status(404).send({ message: `${cardId} Card not found` });
-    console.log('err 404 =>', e?.message);
-  } else if (e?.name == 'ValidationError') {
+    console.log('err 404 =>', e.message);
+  } else if (e.name === 'ValidationError') {
     const message = Object.values(e.errors)
       .map((error) => error.message)
       .join('; ');
     res.status(400).send({ message });
-    console.log('err 400 =>', e?.message);
-  } else if (e?.name == 'CastError') {
+    console.log('err 400 =>', e.message);
+  } else if (e.name === 'CastError') {
     res.status(400).send({ message: `Incorrect card ID: ${cardId}` });
-    console.log('err 400 =>', e?.message);
+    console.log('err 400 =>', e.message);
   } else {
     res.status(500).send({ message: 'Swth went wrong' });
-    console.log('err 500 =>', e?.message);
+    console.log('err 500 =>', e.message);
   }
 }
 
-//GET /cards — возвращает все карточки
+//  GET /cards — возвращает все карточки
 const getCards = (req, res) => {
-  console.log('getCards =>');
-
   Card.find()
     .populate('owner')
     .then((cards) => {
       res.status(200).send({ data: cards });
-      console.log('getCards => Получить карточки');
     })
     .catch((e) => {
       catchingError(req, res, e);
     });
 };
 
-//POST /cards — создаёт карточку
+//  POST /cards — создаёт карточку
 const createCard = (req, res) => {
-  console.log('createCard =>');
-
   const { name, link } = req.body;
   const userId = req.user._id;
 
@@ -51,61 +46,56 @@ const createCard = (req, res) => {
     });
 };
 
-//DELETE /cards/:cardId — удаляет карточку по идентификатору
+//  DELETE /cards/:cardId — удаляет карточку по идентификатору
 const deleteCard = (req, res) => {
-  console.log('deleteCard =>');
-
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
     .orFail(() => {
       throw new Error('Not found');
     })
     .then((card) => {
-      console.log('deleteCard => remote card', card);
       res.status(200).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e, userId);
+      catchingError(req, res, e, cardId);
     });
 };
 
-//PUT /cards/:cardId/likes — поставить лайк карточке
+//  PUT /cards/:cardId/likes — поставить лайк карточке
 const addLikeCard = (req, res) => {
-  console.log('addLikeCard =>');
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true }
+    { new: true },
   )
     .orFail(() => {
       throw new Error('Not found');
     })
     .then((card) => {
-      console.log('addLikeCard => liked card', card);
       res.status(200).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e, req.params.cardId);
+      catchingError(req, res, e, cardId);
     });
 };
 
-//DELETE /cards/:cardId/likes — убрать лайк с карточки
+//  DELETE /cards/:cardId/likes — убрать лайк с карточки
 const deleteLikeCard = (req, res) => {
-  console.log('deleteLikeCard =>');
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
-    { new: true }
+    { new: true },
   )
     .orFail(() => {
       throw new Error('Not found');
     })
     .then((card) => {
-      console.log('addLikeCard => card with a deleted likes', card);
       res.status(200).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e, req.params.cardId);
+      catchingError(req, res, e, cardId);
     });
 };
 
