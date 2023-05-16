@@ -2,8 +2,8 @@ const Card = require('../models/card');
 
 function catchingError(req, res, e, cardId) {
   console.log('err =>', e);
-  if (e?.message == 'Not found') {
-    res.status(404).send({ message: `${cardId} Card not found`});
+  if (e?.message == 'Not found' || e?.name == 'CastError') {
+    res.status(404).send({ message: `${cardId} Card not found` });
     console.log('err 404 =>', e?.message);
   } else if (e?.name == 'ValidationError') {
     const message = Object.values(e.errors)
@@ -22,6 +22,7 @@ const getCards = (req, res) => {
   console.log('getCards =>');
 
   Card.find()
+    .populate('owner')
     .then((cards) => {
       res.status(200).send({ data: cards });
       console.log('getCards => Получить карточки');
@@ -61,7 +62,7 @@ const deleteCard = (req, res) => {
       res.status(200).send({ data: card });
     })
     .catch((e) => {
-      catchingError(req, res, e);
+      catchingError(req, res, e, userId);
     });
 };
 
@@ -71,18 +72,18 @@ const addLikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true },
+    { new: true }
   )
-  .orFail(() => {
-    throw new Error('Not found');
-  })
-  .then((card) => {
-    console.log('addLikeCard => liked card', card);
-    res.status(200).send({ data: card });
-  })
-  .catch((e) => {
-    catchingError(req, res, e);
-  });
+    .orFail(() => {
+      throw new Error('Not found');
+    })
+    .then((card) => {
+      console.log('addLikeCard => liked card', card);
+      res.status(200).send({ data: card });
+    })
+    .catch((e) => {
+      catchingError(req, res, e, req.params.cardId);
+    });
 };
 
 //DELETE /cards/:cardId/likes — убрать лайк с карточки
@@ -91,18 +92,18 @@ const deleteLikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
-    { new: true },
+    { new: true }
   )
-  .orFail(() => {
-    throw new Error('Not found');
-  })
-  .then((card) => {
-    console.log('addLikeCard => card with a deleted likes', card);
-    res.status(200).send({ data: card });
-  })
-  .catch((e) => {
-    catchingError(req, res, e);
-  });
+    .orFail(() => {
+      throw new Error('Not found');
+    })
+    .then((card) => {
+      console.log('addLikeCard => card with a deleted likes', card);
+      res.status(200).send({ data: card });
+    })
+    .catch((e) => {
+      catchingError(req, res, e, req.params.cardId);
+    });
 };
 
 module.exports = {
