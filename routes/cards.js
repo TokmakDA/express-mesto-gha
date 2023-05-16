@@ -6,6 +6,7 @@ const {
   addLikeCard,
   deleteLikeCard,
 } = require('../controllers/cards');
+
 const cardRouter = express.Router();
 
 //GET /cards — возвращает все карточки

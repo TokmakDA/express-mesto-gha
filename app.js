@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 
 const mongoose = require('mongoose');
 const { userRouter, cardRouter } = require('./routes');
@@ -20,8 +19,4 @@ app.use((req, res, next) => {
 app.use(userRouter);
 app.use(cardRouter);
 
-app.listen(PORT, () => {
-  // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listening on port ${PORT}`);
-  console.log(BASE_PATH);
-});
+app.listen(PORT, () => {});

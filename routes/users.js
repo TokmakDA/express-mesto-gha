@@ -15,7 +15,8 @@ userRouter.get('/users', getUsers);
 userRouter.get('/users/:userId', getUser);
 
 // POST /users — создаёт пользователя
-// В теле POST-запроса на создание пользователя передайте JSON-объект с тремя полями: name, about и avatar.
+// В теле POST-запроса на создание пользователя передайте JSON-объект с тремя полями:
+// name, about и avatar.
 userRouter.post('/users', createUser);
 
 // PATCH /users/me — обновляет профиль
