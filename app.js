@@ -5,6 +5,7 @@ const { userRouter, cardRouter } = require('./routes');
 
 const app = express();
 const { PORT = 3000 } = process.env;
+const ERROR_NOT_FOUND = 404;
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
@@ -18,5 +19,8 @@ app.use((req, res, next) => {
 });
 app.use(userRouter);
 app.use(cardRouter);
+app.use('*', (req, res) => {
+  res.status(ERROR_NOT_FOUND).send({ message: 'Fot found' });
+});
 
 app.listen(PORT, () => {});

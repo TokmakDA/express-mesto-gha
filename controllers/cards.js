@@ -1,22 +1,26 @@
 const Card = require('../models/card');
 
+const ERROR_DEFAULT = 500;
+const ERROR_NOT_FOUND = 404;
+const ERROR_DATA = 400;
+
 function catchingError(req, res, e, cardId) {
   console.log('err =>', e);
   if (e.message === 'Not found') {
-    res.status(404).send({ message: `${cardId} Card not found` });
-    console.log('err 404 =>', e.message);
+    res.status(ERROR_NOT_FOUND).send({ message: `${cardId} Card not found` });
+    console.log(`err ${ERROR_NOT_FOUND} =>`, e.message);
   } else if (e.name === 'ValidationError') {
     const message = Object.values(e.errors)
       .map((error) => error.message)
       .join('; ');
-    res.status(400).send({ message });
-    console.log('err 400 =>', e.message);
+    res.status(ERROR_DATA).send({ message });
+    console.log(`err ${ERROR_DATA} =>`, e.message);
   } else if (e.name === 'CastError') {
-    res.status(400).send({ message: `Incorrect card ID: ${cardId}` });
-    console.log('err 400 =>', e.message);
+    res.status(ERROR_DATA).send({ message: `Incorrect card ID: ${cardId}` });
+    console.log(`err ${ERROR_DATA} =>`, e.message);
   } else {
-    res.status(500).send({ message: 'Swth went wrong' });
-    console.log('err 500 =>', e.message);
+    res.status(ERROR_DEFAULT).send({ message: 'Swth went wrong' });
+    console.log(`err ${ERROR_DEFAULT} =>`, e.message);
   }
 }
 
