@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { handleError } = require('../utils/error');
+const { handleError } = require('../errors/errors');
 
 //  GET /cards — возвращает все карточки
 const getCards = (req, res) => {

@@ -2,7 +2,9 @@ const express = require('express');
 
 const mongoose = require('mongoose');
 const { userRouter, cardRouter } = require('./routes');
-const { ERROR_NOT_FOUND } = require('./utils/error');
+const { ERROR_NOT_FOUND } = require('./errors/errors');
+
+const validator = require('validator');
 
 const app = express();
 const { PORT = 3000 } = process.env;

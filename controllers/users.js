@@ -1,5 +1,6 @@
 const User = require('../models/user');
-const { handleError } = require('../utils/error');
+const bcrypt = require('bcryptjs');
+const { handleError } = require('../errors/errors');
 
 //  GET /users — возвращает всех пользователей
 const getUsers = (req, res) => {
@@ -27,16 +28,25 @@ const getUser = (req, res) => {
     });
 };
 
-//  POST /users — создаёт пользователя
-//  В теле POST-запроса на создание пользователя передайте
-//  JSON-объект с тремя полями: name, about и avatar.
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+//  POST /signin — авторизует пользователя
+const login = (req, res) => {};
 
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.status(201).send({ data: user });
-    })
+//  POST /signup — создаёт пользователя
+const createUser = (req, res) => {
+  const { name, about, avatar, email } = req.body;
+  bcrypt
+    .hash(req.body.password, 10)
+    .then((hash) =>
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      }).then((user) => {
+        res.status(201).send({ data: user });
+      }),
+    )
     .catch((e) => {
       handleError(req, res, e);
     });

@@ -5,19 +5,34 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
   name: {
     type: String,
-    required: true,
+    required: false,
     minlength: 2,
     maxlength: 30,
+    default: 'Jacques-Yves Cousteau',
   },
   about: {
     type: String,
-    required: true,
+    required: false,
     minlength: 2,
     maxlength: 30,
+    default: 'Ocean explorer',
   },
   avatar: {
     type: String,
+    required: false,
+    default:
+      'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+  },
+  email: {
+    type: String,
     required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 8,
+    select: false,
   },
 });
 
