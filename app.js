@@ -5,16 +5,16 @@ const { userRouter, cardRouter } = require('./routes');
 const { ERROR_NOT_FOUND } = require('./errors/errors');
 
 const validator = require('validator');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const { PORT = 3000 } = process.env;
 
-mongoose
-  .connect('mongodb://localhost:27017/mestodb')
-  .catch((err) => {
-    console.log(err);
-  });
+mongoose.connect('mongodb://localhost:27017/mestodb').catch((err) => {
+  console.log(err);
+});
 
+app.use(cookieParser());
 app.use(express.json());
 app.use((req, res, next) => {
   req.user = {

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const { Schema } = mongoose;
 
@@ -27,6 +28,9 @@ const userSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    validate(value) {
+      if (!validator.isEmail(value)) throw new Error('Invalid Email');
+    },
   },
   password: {
     type: String,
@@ -35,5 +39,22 @@ const userSchema = new Schema({
     select: false,
   },
 });
+
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email }) // this — это модель User
+    .then((user) => {
+      // не нашёлся — отклоняем промис
+      if (!user) {
+        return Promise.reject(new Error('Incorrect email or password'));
+      }
+      // нашёлся — сравниваем хеши
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error('Incorrect email or password'));
+        }
+        return user; // но переменной user нет в этой области видимости
+      });
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);

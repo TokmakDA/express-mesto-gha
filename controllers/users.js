@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { handleError } = require('../errors/errors');
+const { generateToken } = require('../utils/token');
 
 //  GET /users — возвращает всех пользователей
 const getUsers = (req, res) => {
@@ -29,7 +31,27 @@ const getUser = (req, res) => {
 };
 
 //  POST /signin — авторизует пользователя
-const login = (req, res) => {};
+const login = (req, res) => {
+  const { email } = req.body;
+  bcrypt
+    .hash(req.body.password, 10)
+    .then((hash) =>
+      User.findUserByCredentials(req.body.email, hash).then((user) => {
+        // вернём токен
+        res
+          .cookie('jwt', generateToken(user, 'my-secret-key', '7d'), {
+            // token - наш JWT токен, который мы отправляем
+            maxAge: 3600000 * 24 * 7,
+            httpOnly: true,
+            sameSite: true,
+          })
+          .end();
+      }),
+    )
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
+};
 
 //  POST /signup — создаёт пользователя
 const createUser = (req, res) => {
@@ -103,6 +125,7 @@ const patchAvatar = (req, res) => {
 module.exports = {
   getUsers,
   getUser,
+  login,
   createUser,
   patchUser,
   patchAvatar,
