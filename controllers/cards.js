@@ -1,5 +1,6 @@
 const Card = require('../models/card');
 const { handleError } = require('../errors/errors');
+const card = require('../models/card');
 
 //  GET /cards — возвращает все карточки
 const getCards = (req, res) => {
@@ -31,13 +32,25 @@ const createCard = (req, res) => {
 //  DELETE /cards/:cardId — удаляет карточку по идентификатору
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .populate(['owner', 'likes'])
     .orFail(() => {
       throw new Error('Not found');
     })
     .then((card) => {
-      res.status(200).send({ data: card });
+      if (card.owner._id == req.user._id) {
+        Card.findByIdAndRemove(cardId)
+          .orFail(() => {
+            throw new Error('Not found');
+          })
+          .then((card) => {
+            res.status(200).send({
+              message: `card with id: ${cardId} successfully deleted`,
+            });
+          });
+        return;
+      }
+      throw new Error('You are not the owner');
     })
     .catch((e) => {
       handleError(req, res, e, cardId);

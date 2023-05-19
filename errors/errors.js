@@ -1,12 +1,18 @@
 const ERROR_DEFAULT = 500;
 const ERROR_NOT_FOUND = 404;
 const ERROR_DATA = 400;
+const ERROR_UNAUTHORIZED = 401;
 
 const handleError = (req, res, e, id) => {
-  console.log('err =>', e);
+  // console.log('err =>', e);
   if (e.message === 'Not found') {
     res.status(ERROR_NOT_FOUND).send({ message: `ID:${id} Data not found` });
     console.log(`err ${ERROR_NOT_FOUND} =>`, e.message);
+  } else if (e.message === 'You are not the owner') {
+    res
+      .status(ERROR_UNAUTHORIZED)
+      .send({ message: `You are not the owner Card: ID ${id}` });
+    console.log(`err ${ERROR_UNAUTHORIZED} =>`, e.message);
   } else if (e.name === 'ValidationError') {
     const message = Object.values(e.errors)
       .map((error) => error.message)
