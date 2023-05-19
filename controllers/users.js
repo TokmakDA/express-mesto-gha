@@ -1,6 +1,6 @@
 const User = require('../models/user');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+// const jwt = require('jsonwebtoken');
 const { handleError } = require('../errors/errors');
 const { generateToken } = require('../utils/token');
 
@@ -15,20 +15,20 @@ const getUsers = (req, res) => {
     });
 };
 
-//  GET /users/:userId - возвращает пользователя по _id
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .orFail(() => {
-      throw new Error('Not found');
-    })
-    .then((user) => {
-      res.status(200).send({ data: user });
-    })
-    .catch((e) => {
-      handleError(req, res, e, userId);
-    });
-};
+// //  GET /users/:userId - возвращает пользователя по _id
+// const getUser = (req, res) => {
+//   const { userId } = req.params;
+//   User.findById(userId)
+//     .orFail(() => {
+//       throw new Error('Not found');
+//     })
+//     .then((user) => {
+//       res.status(200).send({ data: user });
+//     })
+//     .catch((e) => {
+//       handleError(req, res, e, userId);
+//     });
+// };
 
 //  GET /users/me - возвращает информацию о текущем пользователе
 const getUserMe = (req, res) => {
@@ -45,24 +45,27 @@ const getUserMe = (req, res) => {
     });
 };
 
+function hashPassword(password) {
+  return bcrypt.hash(password, 10);
+}
+
 //  POST /signin — авторизует пользователя
 const login = (req, res) => {
-  const { email } = req.body;
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) =>
-      User.findUserByCredentials(req.body.email, hash).then((user) => {
-        // вернём токен
-        res
-          .cookie('jwt', generateToken(user, 'my-secret-key', '7d'), {
-            // token - наш JWT токен, который мы отправляем
-            maxAge: 3600000 * 24 * 7,
-            httpOnly: true,
-            sameSite: true,
-          })
-          .end();
-      }),
-    )
+  console.log('login =>', req.body);
+  const { email, password } = req.body;
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const { _id } = user;
+      const token = generateToken({ _id }); // сгенерировали токен
+      // вернём токен
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        })
+        .end();
+    })
     .catch((err) => {
       res.status(401).send({ message: err.message });
     });
@@ -70,18 +73,17 @@ const login = (req, res) => {
 
 //  POST /signup — создаёт пользователя
 const createUser = (req, res) => {
-  const { name, about, avatar, email } = req.body;
-  bcrypt
-    .hash(req.body.password, 10)
+  console.log('createUser =>', req.body);
+  const { email, password } = req.body;
+  hashPassword(password)
     .then((hash) =>
       User.create({
-        name,
-        about,
-        avatar,
         email,
         password: hash,
       }).then((user) => {
-        res.status(201).send({ data: user });
+        const { _id } = user;
+        console.log('createUser => hashPassword =>', { _id });
+        res.status(201).json({ data: { _id } });
       }),
     )
     .catch((e) => {
@@ -139,7 +141,7 @@ const patchAvatar = (req, res) => {
 
 module.exports = {
   getUsers,
-  getUser,
+  // getUser,
   getUserMe,
   login,
   createUser,

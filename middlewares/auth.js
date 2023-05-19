@@ -1,22 +1,18 @@
-const jwt = require('jsonwebtoken');
+const { checkToken } = require('../utils/token');
 
 module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
-
-  // убеждаемся, что он есть или начинается с Bearer
-  if (!authorization || !authorization.startsWith('Bearer ')) {
+  const token = req.cookies.jwt;
+  // убеждаемся, что токен присутсвует
+  if (!token) {
+    console.log('auth => нет куки');
     return res.status(401).send({ message: 'Unauthorized Error' });
   }
 
-  const token = authorization.replace('Bearer ', '');
+  // проверяем
+  const payload = checkToken(token);
 
-  let payload;
-
-  try {
-    // попытаемся верифицировать токен
-    payload = jwt.verify(token, 'my-secret-key');
-  } catch (err) {
-    // отправим ошибку, если не получилось
+  if (!payload) {
+    console.log('payload => куки не прошел проверку');
     return res.status(401).send({ message: 'Unauthorized Error' });
   }
 

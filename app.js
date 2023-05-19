@@ -17,10 +17,10 @@ mongoose.connect('mongodb://localhost:27017/mestodb').catch((err) => {
 app.use(cookieParser());
 app.use(express.json());
 
-app.use(auth, require('./routes'));
-
 app.post('/signin', login);
 app.post('/signup', createUser);
+
+app.use(auth, require('./routes'));
 
 app.listen(PORT, () => {
   console.log(`Start server, port:${PORT}`);
