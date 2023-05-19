@@ -30,6 +30,21 @@ const getUser = (req, res) => {
     });
 };
 
+//  GET /users/me - возвращает информацию о текущем пользователе
+const getUserMe = (req, res) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .orFail(() => {
+      throw new Error('Not found');
+    })
+    .then((user) => {
+      res.status(200).send({ data: user });
+    })
+    .catch((e) => {
+      handleError(req, res, e, userId);
+    });
+};
+
 //  POST /signin — авторизует пользователя
 const login = (req, res) => {
   const { email } = req.body;
@@ -125,6 +140,7 @@ const patchAvatar = (req, res) => {
 module.exports = {
   getUsers,
   getUser,
+  getUserMe,
   login,
   createUser,
   patchUser,

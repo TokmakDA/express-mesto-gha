@@ -41,19 +41,21 @@ const userSchema = new Schema({
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }) // this — это модель User
+  console.log('findUserByCredentials =>', email, password);
+  return this.findOne({ email }).select('+password') // this — это модель User
     .then((user) => {
       // не нашёлся — отклоняем промис
       if (!user) {
         return Promise.reject(new Error('Incorrect email or password'));
       }
       // нашёлся — сравниваем хеши
-      return bcrypt.compare(password, user.password).then((matched) => {
-        if (!matched) {
-          return Promise.reject(new Error('Incorrect email or password'));
-        }
-        return user; // но переменной user нет в этой области видимости
-      });
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new Error('Incorrect email or password'));
+          }
+          return user; // вернем user
+        });
     });
 };
 
