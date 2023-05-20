@@ -46,31 +46,17 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email })
     .select('+password') // this — это модель User
     .then((user) => {
-      console.log('findUserByCredentials => findOne =>');
       // не нашёлся — отклоняем промис
       if (!user) {
-        console.log(
-          'findUserByCredentials => findOne => user не нашёлся — отклоняем промис',
-        );
         return Promise.reject(new Error('Incorrect email or password'));
       }
       // нашёлся — сравниваем хеши
-      console.log(
-        'findUserByCredentials => findOne => user нашёлся — сравниваем хеши',
-      );
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          console.log(
-            'findUserByCredentials => findOne => bcrypt.compare => matched =',
-            matched,
-          );
           return Promise.reject(new Error('Incorrect email or password'));
         }
-        console.log(
-          'findUserByCredentials => findOne => bcrypt.compare => matched =',
-          matched,
-        );
-        return user; // вернем user
+        const { _id, name, about, email } = user;
+        return { _id, name, about, email }; // вернем user
       });
     });
 };

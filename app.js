@@ -1,7 +1,6 @@
 const express = require('express');
 
 const mongoose = require('mongoose');
-const { ERROR_NOT_FOUND } = require('./errors/errors');
 
 const cookieParser = require('cookie-parser');
 const { login, createUser } = require('./controllers/users');
@@ -16,11 +15,12 @@ mongoose.connect('mongodb://localhost:27017/mestodb').catch((err) => {
 
 app.use(cookieParser());
 app.use(express.json());
-
 app.post('/signin', login);
 app.post('/signup', createUser);
-
 app.use(auth, require('./routes'));
+app.use((err, req, res, next) => {
+  res.status(err.statusCode).send({ message: err.message });
+});
 
 app.listen(PORT, () => {
   console.log(`Start server, port:${PORT}`);

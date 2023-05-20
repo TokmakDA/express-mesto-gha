@@ -10,18 +10,18 @@ const {
 const cardRouter = express.Router();
 
 //  GET /cards — возвращает все карточки
-cardRouter.get('/cards', getCards);
+cardRouter.get('/', getCards);
 
 //  POST /cards — создаёт карточку
-cardRouter.post('/cards', createCard);
+cardRouter.post('/', createCard);
 
 //  DELETE /cards/:cardId — удаляет карточку по идентификатору
-cardRouter.delete('/cards/:cardId', deleteCard);
+cardRouter.delete('/:cardId', deleteCard);
 
 //  PUT /cards/:cardId/likes — поставить лайк карточке
-cardRouter.put('/cards/:cardId/likes', addLikeCard);
+cardRouter.put('/:cardId/likes', addLikeCard);
 
 //  DELETE /cards/:cardId/likes — убрать лайк с карточки
-cardRouter.delete('/cards/:cardId/likes', deleteLikeCard);
+cardRouter.delete('/:cardId/likes', deleteLikeCard);
 
 module.exports = { cardRouter };
