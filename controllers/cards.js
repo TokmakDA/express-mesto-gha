@@ -56,10 +56,11 @@ const deleteCard = (req, res, next) => {
       throw new NotFoundError(`Card ${cardId} is not found`);
     })
     .then((card) => {
-      if (card.owner._id == req.user._id) {
+      if (card.owner._id.toString() === req.user._id.toString()) {
         Card.findByIdAndRemove(cardId)
           .orFail(() => {
-            throw new Error('Not found');
+            console.log('deleteLikeCard => orFail');
+            throw new NotFoundError(`Card ${cardId} is not found`);
           })
           .then(() => {
             res.status(200).send({
