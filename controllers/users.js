@@ -120,8 +120,15 @@ const createUser = (req, res, next) => {
       User.create({ email, password: hash })
         .then((user) => {
           // выбираем данные для передачи пользователю
-          const { _id } = user;
-          res.status(201).json({ data: { _id } }); // вернем данные
+          res.status(201).json({
+            data: {
+              _id: user._id,
+              name: user.name,
+              about: user.about,
+              avatar: user.avatar,
+              email: user.email,
+            },
+          }); // вернем данные
         })
         .catch((err) => {
           console.log('createUser => create => err', err);
