@@ -56,7 +56,7 @@ const deleteCard = (req, res, next) => {
       throw new NotFoundError(`Card ${cardId} is not found`);
     })
     .then((card) => {
-      if (card.owner._id === req.user._id) {
+      if (card.owner._id == req.user._id) {
         Card.findByIdAndRemove(cardId)
           .orFail(() => {
             throw new Error('Not found');
