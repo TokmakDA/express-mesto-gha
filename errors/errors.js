@@ -1,43 +1,125 @@
 const ERROR_DEFAULT = 500;
 const ERROR_NOT_FOUND = 404;
-const ERROR_DATA = 400;
+const ERROR_BAD_REQUEST = 400;
 const ERROR_UNAUTHORIZED = 401;
 const ERROR_CONFLICT = 409;
+const ERROR_FORBIDDEN = 403;
 
-const handleError = (err, req, res, id) => {
-  // console.log('err =>', e);
-  if (err.message === 'Unauthorized Error') {
-    res.status(ERROR_UNAUTHORIZED).send({ message: `Unauthorized Error` });
-    console.log(`err ${ERROR_UNAUTHORIZED} =>`, err.message);
-  } else if (err.message === 'Not found') {
-    res.status(ERROR_NOT_FOUND).send({ message: `ID:${id} Data not found` });
-    console.log(`err ${ERROR_NOT_FOUND} =>`, err.message);
-  } else if (err.code === 11000) {
-    res.status(ERROR_CONFLICT).send({ message: `the user already exists` });
-    console.log(`err ${ERROR_CONFLICT} => `, err.message);
-  } else if (err.message === 'You are not the owner') {
+class UnauthorizedError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = ERROR_UNAUTHORIZED;
+    this.name = 'UnauthorizedError';
+  }
+}
+
+class ForbiddenError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = ERROR_FORBIDDEN;
+    this.name = 'ForbiddenError';
+  }
+}
+// this.message = 'Internal Server Error';
+class DefaltError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = ERROR_DEFAULT;
+    this.name = 'DefaltError';
+  }
+}
+// this.message = 'The user already exists';
+class ConflictError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = ERROR_CONFLICT;
+    this.name = 'ConflictError';
+  }
+}
+
+class NotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = ERROR_NOT_FOUND;
+    this.name = 'NotFoundError';
+  }
+}
+
+class BadRequestError extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = ERROR_BAD_REQUEST;
+    this.name = 'BadRequestError';
+  }
+}
+
+function handleError(err, req, res) {
+  console.log('handleError => ');
+  // Вернуть ошибку пользователю
+  const returnErrorToUser = (err, req, res) => {
+    console.log(
+      'handleError => прошел все проверки и выдает ошибку пользователю',
+      err?.name,
+      err?.statusCode,
+      err?.message,
+    );
+
     res
-      .status(ERROR_UNAUTHORIZED)
-      .send({ message: `You are not the owner Card: ID ${id}` });
-    console.log(`err ${ERROR_UNAUTHORIZED} =>`, err.message);
+      .status(err.statusCode ? err.statusCode : 501)
+      .send({ message: err.message ? err.message : 'unexpected error' })
+      .end();
+  };
+
+  if (
+    err.name === 'UnauthorizedError' ||
+    err.name === 'ForbiddenError' ||
+    err.name === 'NotFoundError' ||
+    err.name === 'DefaltError'
+  ) {
+    console.log(`handleError =>  ${err.statusCode} =>`, err.name, err.message);
+
+    returnErrorToUser(err, req, res);
+  } else if (err.name === 'CastError') {
+    err.message = `Incorrect ID`;
+    err.statusCode = ERROR_BAD_REQUEST;
+    //  потом удалить
+    console.log(
+      `handleError => CastError ${err.statusCode} =>`,
+      err.name,
+      err.message,
+    );
+
+    returnErrorToUser(err, req, res);
+  } else if (err.code === 11000) {
+    returnErrorToUser(new ConflictError('the user already exists'), req, res);
   } else if (err.name === 'ValidationError') {
-    const message = Object.values(e.errors)
+    const message = Object.values(err.errors)
       .map((error) => error.message)
       .join('; ');
-    res.status(ERROR_DATA).send({ message });
-    console.log(`err ${ERROR_DATA} =>`, err.message);
-  } else if (err.name === 'CastError') {
-    res.status(ERROR_DATA).send({ message: `Incorrect ID: ${id}` });
-    console.log(`err ${ERROR_DATA} =>`, err.message);
+
+    console.log(
+      `handleError => ValidationError ${err.statusCode} =>`,
+      err.name,
+      err.message,
+    );
+    returnErrorToUser(new BadRequestError(message), req, res);
   } else {
-    res.status(ERROR_DEFAULT).send({ message: 'Swth went wrong' });
-    console.log(`err ${ERROR_DEFAULT} =>`, err.message);
+    const err = new DefaltError('Swth went wrong');
+    console.log(
+      `handleError =>  DefaltError ${err.statusCode} =>`,
+      err.name,
+      err.message,
+    );
+
+    returnErrorToUser(err, req, res);
   }
-};
+}
 
 module.exports = {
-  ERROR_DEFAULT,
-  ERROR_NOT_FOUND,
-  ERROR_DATA,
   handleError,
+  UnauthorizedError,
+  ForbiddenError,
+  DefaltError,
+  ConflictError,
+  NotFoundError,
 };

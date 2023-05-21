@@ -1,10 +1,11 @@
 const User = require('../models/user');
-const bcrypt = require('bcrypt');
-const { handleError } = require('../errors/errors');
+const { handleError, NotFoundError, DefaltError } = require('../errors/errors');
 const { generateToken } = require('../utils/token');
+const { hashPassword } = require('../utils/hash');
 
 //  GET /users — возвращает всех пользователей
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
+  //  потом удалить
   console.log('getUser => req.cookie.jwt', req.cookies.jwt);
   User.find()
     .then((users) => {
@@ -13,11 +14,13 @@ const getUsers = (req, res) => {
     .catch((err) => {
       console.log('getUsers => err', err);
       handleError(err, req, res);
+      // // next(newErr);
     });
 };
 
 //  GET /users/me - возвращает информацию о текущем пользователе
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
+  //  потом удалить
   console.log(
     'getUser => req.user , req.cookies.jwt',
     req.user,
@@ -26,7 +29,8 @@ const getUser = (req, res) => {
   const userId = req.user._id;
   User.findById(userId)
     .orFail(() => {
-      throw new Error('Not found');
+      console.log('getUser => orFail');
+      throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
       // выбираем поля для передачи пользователю
@@ -34,23 +38,20 @@ const getUser = (req, res) => {
       res.status(200).json({ data: { _id, name, about, email } });
     })
     .catch((err) => {
-      console.log('getUser => err', err);
-      handleError(err, req, res, userId);
+      handleError(err, req, res);
     });
 };
 
-function hashPassword(password) {
-  return bcrypt.hash(password, 10);
-}
-
 //  POST /signin — авторизует пользователя
-const login = (req, res) => {
+const login = (req, res, next) => {
+  //  потом удалить
   console.log('login => req.body', req.body);
   const { email, password } = req.body;
   User.findUserByCredentials(email, password)
     .then((user) => {
       // выбираем данные для передачи пользователю
-      const { _id, name, about, email } = user;
+      console.log('login =>', user);
+      const { _id, name, about, avatar, email } = user;
       const token = generateToken({ _id }); // сгенерировали токен
       // вернём токен
       res
@@ -60,18 +61,19 @@ const login = (req, res) => {
           sameSite: true,
         })
         .status(200)
-        .json({ data: { _id, name, about, email } }); // вернем данные
+        .json({ data: { _id, name, about, avatar, email } }); // вернем данные
     })
     .catch((err) => {
       console.log('login => err', err);
-      res.status(401).json({ message: err.message });
+      next(err);
     });
 };
 
 //  POST /signup — создаёт пользователя
 const createUser = (req, res) => {
+  //  потом удалить
   console.log('createUser => req.body', req.body);
-  const { email, password } = req.body;
+  const { email, password, name, about, avatar } = req.body;
   hashPassword(password)
     .then((hash) =>
       User.create({
@@ -109,11 +111,12 @@ const patchUser = (req, res) => {
     },
   )
     .orFail(() => {
-      throw new Error('Not found');
+      console.log('getUser => orFail');
+      throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
-      const { _id, name, about, email } = user;
-      res.status(200).json({ data: { _id, name, about, email } });
+      const { _id, name, about, avatar, email } = user;
+      res.status(200).json({ data: { _id, name, about, avatar, email } });
     })
     .catch((err) => {
       console.log('patchUser => err', err);
@@ -141,15 +144,16 @@ const patchAvatar = (req, res) => {
     },
   )
     .orFail(() => {
-      throw new Error('Not found');
+      console.log('patchAvatar => orFail');
+      throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
-      const { _id, name, about, email } = user;
-      res.status(200).json({ data: { _id, name, about, email } });
+      const { _id, name, about, avatar, email } = user;
+      res.status(200).json({ data: { _id, name, about, avatar, email } });
     })
     .catch((err) => {
       console.log('patchAvatar => err', err);
-      handleError(err, req, res, userId);
+      handleError(err, req, res);
     });
 };
 

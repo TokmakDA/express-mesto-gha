@@ -1,6 +1,9 @@
 const Card = require('../models/card');
-const { handleError } = require('../errors/errors');
-// const card = require('../models/card');
+const {
+  handleError,
+  ForbiddenError,
+  NotFoundError,
+} = require('../errors/errors');
 
 //  GET /cards — возвращает все карточки
 const getCards = (req, res) => {
@@ -14,8 +17,8 @@ const getCards = (req, res) => {
     .then((cards) => {
       res.status(200).send({ data: cards });
     })
-    .catch((e) => {
-      handleError(e, req, res);
+    .catch((err) => {
+      handleError(err, req, res);
     });
 };
 
@@ -35,8 +38,8 @@ const createCard = (req, res) => {
     .then((card) => {
       res.status(201).send({ data: card });
     })
-    .catch((e) => {
-      handleError(e, req, res);
+    .catch((err) => {
+      handleError(err, req, res);
     });
 };
 
@@ -51,28 +54,29 @@ const deleteCard = (req, res) => {
   const { cardId } = req.params;
 
   Card.findById(cardId)
-  .populate(['owner', 'likes'])
-  .orFail(() => {
-    throw new Error('Not found');
-  })
-  .then((card) => {
-    if (card.owner._id == req.user._id) {
-      Card.findByIdAndRemove(cardId)
-        .orFail(() => {
-          throw new Error('Not found');
-        })
-        .then((card) => {
-          res.status(200).send({
-            message: `card with id: ${cardId} successfully deleted`,
+    .populate(['owner', 'likes'])
+    .orFail(() => {
+      console.log('deleteLikeCard => orFail');
+      throw new NotFoundError(`Card ${userId} is not found`);
+    })
+    .then((card) => {
+      if (card.owner._id == req.user._id) {
+        Card.findByIdAndRemove(cardId)
+          .orFail(() => {
+            throw new Error('Not found');
+          })
+          .then((card) => {
+            res.status(200).send({
+              message: `card with id: ${cardId} successfully deleted`,
+            });
           });
-        });
-      return;
-    }
-    throw new Error('You are not the owner');
-  })
-  .catch((e) => {
-    handleError(e, req, res, cardId);
-  });
+        return;
+      }
+      throw new ForbiddenError(`You are not the owner Card: ID ${id}`);
+    })
+    .catch((err) => {
+      handleError(err, req, res);
+    });
 };
 
 //  PUT /cards/:cardId/likes — поставить лайк карточке
@@ -91,13 +95,14 @@ const addLikeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      throw new Error('Not found');
+      console.log('addLikeCard => orFail');
+      throw new NotFoundError(`Card ${userId} is not found`);
     })
     .then((card) => {
       res.status(200).send({ data: card });
     })
-    .catch((e) => {
-      handleError(e, req, res, cardId);
+    .catch((err) => {
+      handleError(err, req, res);
     });
 };
 
@@ -111,13 +116,14 @@ const deleteLikeCard = (req, res) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      throw new Error('Not found');
+      console.log('deleteLikeCard => orFail');
+      throw new NotFoundError(`Card ${userId} is not found`);
     })
     .then((card) => {
       res.status(200).send({ data: card });
     })
-    .catch((e) => {
-      handleError(e, req, res, cardId);
+    .catch((err) => {
+      handleError(err, req, res);
     });
 };
 

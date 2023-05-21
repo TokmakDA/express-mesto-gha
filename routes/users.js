@@ -12,7 +12,7 @@ const userRouter = express.Router();
 userRouter.get('/', getUsers);
 
 // //  GET /users/:userId - возвращает пользователя по _id
-// userRouter.get('/users/:userId', getUser);
+// userRouter.get('/:userId', getUser);
 
 //  GET /users/me - возвращает информацию о текущем пользователе
 userRouter.get('/me', getUser);
