@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+
 const SECKRET_KEY = 'my-secret-key';
 
 function generateToken(payload) {
@@ -15,7 +16,7 @@ function checkToken(token) {
   }
   try {
     return jwt.verify(token, SECKRET_KEY);
-  } catch {
+  } catch (e) {
     return false;
   }
 }

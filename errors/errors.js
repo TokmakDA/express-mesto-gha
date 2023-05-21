@@ -1,97 +1,48 @@
-const ERROR_DEFAULT = 500;
-const ERROR_NOT_FOUND = 404;
-const ERROR_BAD_REQUEST = 400;
-const ERROR_UNAUTHORIZED = 401;
-const ERROR_CONFLICT = 409;
-const ERROR_FORBIDDEN = 403;
+const { BadRequestError } = require('./BadRequestError');
+const { ConflictError } = require('./ConflictError');
+const { DefaltError } = require('./DefaltError');
+const { ForbiddenError } = require('./ForbiddenError');
+const { NotFoundError } = require('./NotFoundError');
+const SomeError = require('./SomeError');
+const { UnauthorizedError } = require('./UnauthorizedError');
 
-class UnauthorizedError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = ERROR_UNAUTHORIZED;
-    this.name = 'UnauthorizedError';
-  }
-}
+const returnErrorToUser = (err, req, res) => {
+  console.log(
+    'handleError => прошел все проверки и выдает ошибку пользователю => returnErrorToUser =>',
+    err.name,
+    err.statusCode,
+    err.message,
+  );
 
-class ForbiddenError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = ERROR_FORBIDDEN;
-    this.name = 'ForbiddenError';
-  }
-}
-// this.message = 'Internal Server Error';
-class DefaltError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = ERROR_DEFAULT;
-    this.name = 'DefaltError';
-  }
-}
-// this.message = 'The user already exists';
-class ConflictError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = ERROR_CONFLICT;
-    this.name = 'ConflictError';
-  }
-}
-
-class NotFoundError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = ERROR_NOT_FOUND;
-    this.name = 'NotFoundError';
-  }
-}
-
-class BadRequestError extends Error {
-  constructor(message) {
-    super(message);
-    this.statusCode = ERROR_BAD_REQUEST;
-    this.name = 'BadRequestError';
-  }
-}
+  res
+    .status(err.statusCode ?? 501)
+    .send({ message: err.message ?? 'unexpected error' })
+    .end();
+};
 
 function handleError(err, req, res) {
   console.log('handleError => ');
   // Вернуть ошибку пользователю
-  const returnErrorToUser = (err, req, res) => {
-    console.log(
-      'handleError => прошел все проверки и выдает ошибку пользователю',
-      err?.name,
-      err?.statusCode,
-      err?.message,
-    );
 
-    res
-      .status(err.statusCode ? err.statusCode : 501)
-      .send({ message: err.message ? err.message : 'unexpected error' })
-      .end();
-  };
-
-  if (
-    err.name === 'UnauthorizedError' ||
-    err.name === 'ForbiddenError' ||
-    err.name === 'NotFoundError' ||
-    err.name === 'DefaltError'
-  ) {
+  if (err instanceof SomeError) {
     console.log(`handleError =>  ${err.statusCode} =>`, err.name, err.message);
 
     returnErrorToUser(err, req, res);
   } else if (err.name === 'CastError') {
-    err.message = `Incorrect ID`;
-    err.statusCode = ERROR_BAD_REQUEST;
+    const newErr = new BadRequestError('Incorrect ID');
+    // err.message = `Incorrect ID`;
+    // err.statusCode = ERROR_BAD_REQUEST;
     //  потом удалить
     console.log(
-      `handleError => CastError ${err.statusCode} =>`,
-      err.name,
-      err.message,
+      `handleError => CastError ${newErr.statusCode} =>`,
+      newErr.name,
+      newErr.message,
     );
 
-    returnErrorToUser(err, req, res);
+    returnErrorToUser(newErr, req, res);
   } else if (err.code === 11000) {
-    returnErrorToUser(new ConflictError('the user already exists'), req, res);
+    const newErr = new ConflictError('the user already exists');
+    returnErrorToUser(newErr, req, res);
   } else if (err.name === 'ValidationError') {
     const message = Object.values(err.errors)
       .map((error) => error.message)
@@ -102,24 +53,27 @@ function handleError(err, req, res) {
       err.name,
       err.message,
     );
-    returnErrorToUser(new BadRequestError(message), req, res);
+
+    const newErr = new BadRequestError(message);
+    returnErrorToUser(newErr, req, res);
   } else {
-    const err = new DefaltError('Swth went wrong');
+    const newErr = new DefaltError('Swth went wrong');
     console.log(
-      `handleError =>  DefaltError ${err.statusCode} =>`,
-      err.name,
-      err.message,
+      `handleError =>  DefaltError ${newErr.statusCode} =>`,
+      newErr.name,
+      newErr.message,
     );
 
-    returnErrorToUser(err, req, res);
+    returnErrorToUser(newErr, req, res);
   }
 }
 
 module.exports = {
   handleError,
-  UnauthorizedError,
-  ForbiddenError,
-  DefaltError,
+  BadRequestError,
   ConflictError,
+  DefaltError,
+  ForbiddenError,
   NotFoundError,
+  UnauthorizedError,
 };

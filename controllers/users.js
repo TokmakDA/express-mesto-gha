@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { handleError, NotFoundError, DefaltError } = require('../errors/errors');
+const { NotFoundError } = require('../errors/errors');
 const { generateToken } = require('../utils/token');
 const { hashPassword } = require('../utils/hash');
 
@@ -13,19 +13,45 @@ const getUsers = (req, res, next) => {
     })
     .catch((err) => {
       console.log('getUsers => err', err);
-      handleError(err, req, res);
-      // // next(newErr);
+      next(err);
+    });
+};
+
+//  GET /users/:userId - возвращает пользователя по _id
+const getUser = (req, res, next) => {
+  console.log('getUser => ');
+
+  const { userId } = req.params;
+  console.log('getUser => req.params', userId);
+
+  User.findById(userId)
+    .orFail(() => {
+      console.log('getUser => orFail');
+      throw new NotFoundError(`User ${userId} is not found`);
+    })
+    .then((user) => {
+      res.status(200).send({ data: user });
+    })
+    .catch((err) => {
+      next(err);
     });
 };
 
 //  GET /users/me - возвращает информацию о текущем пользователе
-const getUser = (req, res, next) => {
+const getUserMe = (req, res, next) => {
   //  потом удалить
   console.log(
     'getUser => req.user , req.cookies.jwt',
     req.user,
     req.cookies.jwt,
   );
+
+  // if (req.params) {
+  //   const {peram} = req.params
+  //   console.log('getUserMe => req.params => getUser', peram);
+  //   getUser;
+  // }
+
   const userId = req.user._id;
   User.findById(userId)
     .orFail(() => {
@@ -34,11 +60,18 @@ const getUser = (req, res, next) => {
     })
     .then((user) => {
       // выбираем поля для передачи пользователю
-      const { _id, name, about, email } = user;
-      res.status(200).json({ data: { _id, name, about, email } });
+      res.status(200).json({
+        data: {
+          _id: user._id,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        },
+      });
     })
     .catch((err) => {
-      handleError(err, req, res);
+      next(err);
     });
 };
 
@@ -51,7 +84,7 @@ const login = (req, res, next) => {
     .then((user) => {
       // выбираем данные для передачи пользователю
       console.log('login =>', user);
-      const { _id, name, about, avatar, email } = user;
+      const { _id } = user;
       const token = generateToken({ _id }); // сгенерировали токен
       // вернём токен
       res
@@ -61,7 +94,15 @@ const login = (req, res, next) => {
           sameSite: true,
         })
         .status(200)
-        .json({ data: { _id, name, about, avatar, email } }); // вернем данные
+        .json({
+          data: {
+            _id: user._id,
+            name: user.name,
+            about: user.about,
+            avatar: user.avatar,
+            email: user.email,
+          },
+        }); // вернем данные
     })
     .catch((err) => {
       console.log('login => err', err);
@@ -70,29 +111,31 @@ const login = (req, res, next) => {
 };
 
 //  POST /signup — создаёт пользователя
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   //  потом удалить
   console.log('createUser => req.body', req.body);
-  const { email, password, name, about, avatar } = req.body;
+  const { email, password } = req.body;
   hashPassword(password)
-    .then((hash) =>
-      User.create({
-        email,
-        password: hash,
-      }).then((user) => {
-        // выбираем данные для передачи пользователю
-        const { _id, name, about, email } = user;
-        res.status(201).json({ data: { _id } }); // вернем данные
-      }),
-    )
+    .then((hash) => {
+      User.create({ email, password: hash })
+        .then((user) => {
+          // выбираем данные для передачи пользователю
+          const { _id } = user;
+          res.status(201).json({ data: { _id } }); // вернем данные
+        })
+        .catch((err) => {
+          console.log('createUser => create => err', err);
+          next(err);
+        });
+    })
     .catch((err) => {
-      console.log('createUser => err', err);
-      handleError(err, req, res);
+      console.log('createUser => hashPassword => err', err);
+      next(err);
     });
 };
 
 // PATCH /users/me — обновляет профиль
-const patchUser = (req, res) => {
+const patchUser = (req, res, next) => {
   console.log(
     'patchUser => req.body, req.user, req.cookies.jwt',
     req.body,
@@ -115,17 +158,24 @@ const patchUser = (req, res) => {
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
-      const { _id, name, about, avatar, email } = user;
-      res.status(200).json({ data: { _id, name, about, avatar, email } });
+      res.status(200).json({
+        data: {
+          _id: user._id,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        },
+      });
     })
     .catch((err) => {
       console.log('patchUser => err', err);
-      handleError(err, req, res, userId);
+      next(err);
     });
 };
 
 // PATCH /users/me/avatar — обновляет аватар
-const patchAvatar = (req, res) => {
+const patchAvatar = (req, res, next) => {
   console.log(
     'patchAvatar => req.body, req.user, req.cookies.jwt',
     req.body,
@@ -148,18 +198,26 @@ const patchAvatar = (req, res) => {
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
-      const { _id, name, about, avatar, email } = user;
-      res.status(200).json({ data: { _id, name, about, avatar, email } });
+      res.status(200).json({
+        data: {
+          _id: user._id,
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+        },
+      });
     })
     .catch((err) => {
       console.log('patchAvatar => err', err);
-      handleError(err, req, res);
+      next(err);
     });
 };
 
 module.exports = {
   getUsers,
   getUser,
+  getUserMe,
   login,
   createUser,
   patchUser,

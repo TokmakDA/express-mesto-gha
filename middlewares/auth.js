@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
   try {
     const payload = await checkToken(token);
     req.user = { _id: payload._id };
-  } catch {
+  } catch (e) {
     console.log('payload => куки не прошел проверку');
     next(err);
   }
