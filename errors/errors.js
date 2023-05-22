@@ -15,8 +15,8 @@ const returnErrorToUser = (err, req, res) => {
   );
 
   res
-    .status(err.statusCode ?? 501)
-    .send({ message: err.message ?? 'unexpected error' })
+    .status(err.statusCode)
+    .send({ message: err.message})
     .end();
 };
 
@@ -57,7 +57,7 @@ function handleError(err, req, res, next) {
 
     const newErr = new BadRequestError(err.message);
     returnErrorToUser(newErr, req, res);
-  } 
+  }
   // Ошибки перехваченные от celebrate
   else if (err.message === 'Validation failed') {
     console.log(`handleError => Validation failed  =>`, err);
