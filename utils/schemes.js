@@ -1,6 +1,6 @@
-const { celebrate, Joi, Segments, errors } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 
-userSchema = {
+const userSchema = {
   name: Joi.string().min(2).max(30),
   about: Joi.string().min(2).max(30),
   avatar: Joi.string(),
@@ -8,7 +8,7 @@ userSchema = {
   password: Joi.string().min(8).strip().required(),
 };
 
-cardSchema = {
+const cardSchema = {
   name: Joi.string().min(2).max(30).required(),
   link: Joi.string().required(),
 };

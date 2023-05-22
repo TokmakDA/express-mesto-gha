@@ -1,4 +1,6 @@
 const express = require('express');
+const { celebrate, Joi } = require('celebrate');
+const { userSchema } = require('../utils/schemes');
 const {
   getUsers,
   getUser,
@@ -6,8 +8,6 @@ const {
   patchUser,
   patchAvatar,
 } = require('../controllers/users');
-const { celebrate, Joi } = require('celebrate');
-const { userSchema } = require('../utils/schemes');
 
 const userRouter = express.Router();
 

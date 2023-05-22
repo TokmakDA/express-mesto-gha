@@ -114,10 +114,21 @@ const login = (req, res, next) => {
 const createUser = (req, res, next) => {
   //  потом удалить
   console.log('createUser => req.body', req.body);
-  const { email, password, name, about, avatar } = req.body;
+  const {
+    email,
+    password,
+    name, about,
+    avatar,
+  } = req.body;
   hashPassword(password)
     .then((hash) => {
-      User.create({ email, password: hash, name, about, avatar })
+      User.create({
+        email,
+        password: hash,
+        name,
+        about,
+        avatar,
+      })
         .then((user) => {
           // выбираем данные для передачи пользователю
           res.status(201).json({

@@ -3,11 +3,11 @@ const express = require('express');
 const process = require('process');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const { celebrate, Joi, errors } = require('celebrate');
 const routes = require('./routes');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { handleError, NotFoundError } = require('./errors/errors');
-const { celebrate, Joi, Segments, errors } = require('celebrate');
 const { userSchema } = require('./utils/schemes');
 
 const app = express();
