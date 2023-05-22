@@ -1,4 +1,6 @@
 const express = require('express');
+const { celebrate, Joi } = require('celebrate');
+const { cardSchema } = require('../utils/schemes');
 const {
   getCards,
   createCard,
@@ -13,7 +15,13 @@ const cardRouter = express.Router();
 cardRouter.get('/', getCards);
 
 //  POST /cards — создаёт карточку
-cardRouter.post('/', createCard);
+cardRouter.post(
+  '/',
+  celebrate({
+    body: Joi.object().keys(cardSchema).unknown(true),
+  }),
+  createCard,
+);
 
 //  DELETE /cards/:cardId — удаляет карточку по идентификатору
 cardRouter.delete('/:cardId', deleteCard);
