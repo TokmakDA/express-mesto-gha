@@ -1,6 +1,6 @@
-const { celebrate, Joi } = require('celebrate');
+const { Joi } = require('celebrate');
 
-const userSchema = {
+const userConfig = {
   name: Joi.string().min(2).max(30),
   about: Joi.string().min(2).max(30),
   avatar: Joi.string().regex(/(https?:\/\/)\w+?(\S+|W+)?(\w+)?.\w{2,15}\/?/),
@@ -8,28 +8,42 @@ const userSchema = {
   password: Joi.string().min(8).required(),
 };
 
-const cardSchema = {
-  name: Joi.string().min(2).max(30).required(),
-  link: Joi.string()
-    .required()
-    .regex(/(https?:\/\/)\w+?(\S+|W+)?(\w+)?.\w{2,15}\/?/),
+const userSchema = {
+  body: Joi.object().keys(userConfig).unknown(true),
 };
 
-celebrate({
+const userSchemaUpdate = {
   body: Joi.object()
     .keys({
-      name: userSchema.name,
-      about: userSchema.about,
-      avatar: userSchema.avatar,
+      name: userConfig.name,
+      about: userConfig.about,
+      avatar: userConfig.avatar,
     })
     .unknown(true),
-});
+};
 
-celebrate({
-  body: Joi.object().keys({ userSchema }).unknown(true),
-});
+const cardSchema = {
+  body: Joi.object()
+    .keys({
+      name: Joi.string().min(2).max(30).required(),
+      link: Joi.string()
+        .required()
+        .regex(/(https?:\/\/)\w+?(\S+|W+)?(\w+)?.\w{2,15}\/?/),
+    })
+    .unknown(true),
+};
+
+const cardIdSchema = {
+  params: Joi.object()
+    .keys({
+      postId: Joi.string().alphanum().length(24),
+    })
+    .unknown(true),
+};
 
 module.exports = {
   userSchema,
   cardSchema,
+  cardIdSchema,
+  userSchemaUpdate,
 };

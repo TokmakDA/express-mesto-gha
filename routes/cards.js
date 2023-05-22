@@ -1,6 +1,6 @@
 const express = require('express');
-const { celebrate, Joi } = require('celebrate');
-const { cardSchema } = require('../utils/schemes');
+const { celebrate } = require('celebrate');
+const { cardSchema, cardIdSchema } = require('../utils/schemes');
 const {
   getCards,
   createCard,
@@ -15,21 +15,15 @@ const cardRouter = express.Router();
 cardRouter.get('/', getCards);
 
 //  POST /cards — создаёт карточку
-cardRouter.post(
-  '/',
-  celebrate({
-    body: Joi.object().keys(cardSchema).unknown(true),
-  }),
-  createCard,
-);
+cardRouter.post('/', celebrate(cardSchema), createCard);
 
 //  DELETE /cards/:cardId — удаляет карточку по идентификатору
-cardRouter.delete('/:cardId', deleteCard);
+cardRouter.delete('/:cardId', celebrate(cardIdSchema), deleteCard);
 
 //  PUT /cards/:cardId/likes — поставить лайк карточке
-cardRouter.put('/:cardId/likes', addLikeCard);
+cardRouter.put('/:cardId/likes', celebrate(cardIdSchema), addLikeCard);
 
 //  DELETE /cards/:cardId/likes — убрать лайк с карточки
-cardRouter.delete('/:cardId/likes', deleteLikeCard);
+cardRouter.delete('/:cardId/likes', celebrate(cardIdSchema), deleteLikeCard);
 
 module.exports = { cardRouter };
