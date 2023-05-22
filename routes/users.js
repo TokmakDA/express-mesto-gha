@@ -1,6 +1,6 @@
 const express = require('express');
 const { celebrate } = require('celebrate');
-const { userSchemaUpdate } = require('../utils/schemes');
+const { userSchemaUpdate, userIdSchema } = require('../utils/schemes');
 const {
   getUsers,
   getUser,
@@ -18,7 +18,7 @@ userRouter.get('/', getUsers);
 userRouter.get('/me', getUserMe);
 
 //  GET /users/:userId - возвращает пользователя по _id
-userRouter.get('/:userId/', getUser);
+userRouter.get('/:userId/', celebrate(userIdSchema), getUser);
 
 //  PATCH /users/me — обновляет профиль
 userRouter.patch('/me', celebrate(userSchemaUpdate), patchUser);

@@ -12,12 +12,29 @@ const userSchema = {
   body: Joi.object().keys(userConfig).unknown(true),
 };
 
+const userSchemaLogin = {
+  body: Joi.object()
+    .keys({
+      email: userConfig.email,
+      password: userConfig.password,
+    })
+    .unknown(true),
+};
+
 const userSchemaUpdate = {
   body: Joi.object()
     .keys({
       name: userConfig.name,
       about: userConfig.about,
       avatar: userConfig.avatar,
+    })
+    .unknown(true),
+};
+
+const userIdSchema = {
+  params: Joi.object()
+    .keys({
+      userId: Joi.string().alphanum().length(24),
     })
     .unknown(true),
 };
@@ -36,14 +53,16 @@ const cardSchema = {
 const cardIdSchema = {
   params: Joi.object()
     .keys({
-      postId: Joi.string().alphanum().length(24),
+      cardId: Joi.string().alphanum().length(24),
     })
     .unknown(true),
 };
 
 module.exports = {
   userSchema,
+  userSchemaLogin,
+  userSchemaUpdate,
+  userIdSchema,
   cardSchema,
   cardIdSchema,
-  userSchemaUpdate,
 };
