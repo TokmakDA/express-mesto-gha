@@ -20,8 +20,8 @@ const returnErrorToUser = (err, req, res) => {
     .end();
 };
 
-function handleError(err, req, res) {
-  console.log('handleError => ');
+function handleError(err, req, res, next) {
+  console.log('handleError => ', err);
   // Вернуть ошибку пользователю
 
   if (err instanceof SomeError) {
@@ -44,6 +44,7 @@ function handleError(err, req, res) {
     const newErr = new ConflictError('the user already exists');
     returnErrorToUser(newErr, req, res);
   } else if (err.name === 'ValidationError') {
+    console.log(`handleError => ValidationError  =>`, err);
     const message = Object.values(err.errors)
       .map((error) => error.message)
       .join('; ');
@@ -54,8 +55,13 @@ function handleError(err, req, res) {
       err.message,
     );
 
-    const newErr = new BadRequestError(message);
+    const newErr = new BadRequestError(err.message);
     returnErrorToUser(newErr, req, res);
+  } 
+  // Ошибки перехваченные от celebrate
+  else if (err.message === 'Validation failed') {
+    console.log(`handleError => Validation failed  =>`, err);
+    next(err);
   } else {
     const newErr = new DefaltError('Swth went wrong');
     console.log(

@@ -6,6 +6,8 @@ const {
   patchUser,
   patchAvatar,
 } = require('../controllers/users');
+const { celebrate, Joi } = require('celebrate');
+const { userSchema } = require('../utils/schemes');
 
 const userRouter = express.Router();
 
@@ -19,9 +21,30 @@ userRouter.get('/me', getUserMe);
 userRouter.get('/:userId/', getUser);
 
 //  PATCH /users/me — обновляет профиль
-userRouter.patch('/me', patchUser);
+userRouter.patch(
+  '/me',
+  celebrate({
+    body: Joi.object()
+      .keys({
+        name: userSchema.name,
+        about: userSchema.about,
+      })
+      .unknown(true),
+  }),
+  patchUser,
+);
 
 //  PATCH /users/me/avatar — обновляет аватар
-userRouter.patch('/me/avatar', patchAvatar);
+userRouter.patch(
+  '/me/avatar',
+  celebrate({
+    body: Joi.object()
+      .keys({
+        avatar: userSchema.avatar,
+      })
+      .unknown(true),
+  }),
+  patchAvatar,
+);
 
 module.exports = { userRouter };
