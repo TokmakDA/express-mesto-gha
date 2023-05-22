@@ -5,28 +5,21 @@ const { generateToken } = require('../utils/token');
 
 //  GET /users — возвращает всех пользователей
 const getUsers = (req, res, next) => {
-  //  потом удалить
-  console.log('getUser => req.cookie.jwt', req.cookies.jwt);
   User.find()
     .then((users) => {
       res.status(200).json({ data: users });
     })
     .catch((err) => {
-      console.log('getUsers => err', err);
       next(err);
     });
 };
 
 //  GET /users/:userId - возвращает пользователя по _id
 const getUser = (req, res, next) => {
-  console.log('getUser => ');
-
   const { userId } = req.params;
-  console.log('getUser => req.params', userId);
 
   User.findById(userId)
     .orFail(() => {
-      console.log('getUser => orFail');
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
@@ -39,23 +32,10 @@ const getUser = (req, res, next) => {
 
 //  GET /users/me - возвращает информацию о текущем пользователе
 const getUserMe = (req, res, next) => {
-  //  потом удалить
-  console.log(
-    'getUser => req.user , req.cookies.jwt',
-    req.user,
-    req.cookies.jwt,
-  );
-
-  // if (req.params) {
-  //   const {peram} = req.params
-  //   console.log('getUserMe => req.params => getUser', peram);
-  //   getUser;
-  // }
-
   const userId = req.user._id;
+
   User.findById(userId)
     .orFail(() => {
-      console.log('getUser => orFail');
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
@@ -77,16 +57,13 @@ const getUserMe = (req, res, next) => {
 
 //  POST /signin — авторизует пользователя
 const login = (req, res, next) => {
-  //  потом удалить
-  console.log('login => req.body', req.body);
   const { email, password } = req.body;
+
   User.findUserByCredentials(email, password)
     .then((user) => {
-      // выбираем данные для передачи пользователю
-      console.log('login =>', user);
       const { _id } = user;
       const token = generateToken({ _id }); // сгенерировали токен
-      // вернём токен
+      // вернём токен пользователю
       res
         .cookie('jwt', token, {
           maxAge: 3600000 * 24 * 7,
@@ -105,15 +82,12 @@ const login = (req, res, next) => {
         }); // вернем данные
     })
     .catch((err) => {
-      console.log('login => err', err);
       next(err);
     });
 };
 
 //  POST /signup — создаёт пользователя
 const createUser = (req, res, next) => {
-  //  потом удалить
-  console.log('createUser => req.body', req.body);
   const {
     email,
     password,
@@ -144,24 +118,16 @@ const createUser = (req, res, next) => {
           }); // вернем данные
         })
         .catch((err) => {
-          console.log('createUser => create => err', err);
           next(err);
         });
     })
     .catch((err) => {
-      console.log('createUser => hashPassword => err', err);
       next(err);
     });
 };
 
 // PATCH /users/me — обновляет профиль
 const patchUser = (req, res, next) => {
-  console.log(
-    'patchUser => req.body, req.user, req.cookies.jwt',
-    req.body,
-    req.user,
-    req.cookies.jwt,
-  );
   const { name, about } = req.body;
   const userId = req.user._id;
 
@@ -174,7 +140,6 @@ const patchUser = (req, res, next) => {
     },
   )
     .orFail(() => {
-      console.log('getUser => orFail');
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
@@ -189,22 +154,15 @@ const patchUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log('patchUser => err', err);
       next(err);
     });
 };
 
 // PATCH /users/me/avatar — обновляет аватар
 const patchAvatar = (req, res, next) => {
-  console.log(
-    'patchAvatar => req.body, req.user, req.cookies.jwt',
-    req.body,
-    req.user,
-    req.cookies.jwt,
-  );
   const { avatar } = req.body;
   const userId = req.user._id;
-  console.log(userId);
+
   User.findByIdAndUpdate(
     userId,
     { avatar },
@@ -214,7 +172,6 @@ const patchAvatar = (req, res, next) => {
     },
   )
     .orFail(() => {
-      console.log('patchAvatar => orFail');
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
@@ -229,7 +186,6 @@ const patchAvatar = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log('patchAvatar => err', err);
       next(err);
     });
 };

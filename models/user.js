@@ -43,7 +43,6 @@ const userSchema = new Schema({
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  console.log('findUserByCredentials =>');
   return this.findOne({ email })
     .select('+password') // this — это модель User
     .then((user) => {

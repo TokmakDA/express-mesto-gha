@@ -3,11 +3,6 @@ const { ForbiddenError, NotFoundError } = require('../errors/errors');
 
 //  GET /cards — возвращает все карточки
 const getCards = (req, res, next) => {
-  console.log(
-    'GET /cards getCards => req.user, req.cookies.jwt',
-    req.user,
-    req.cookies.jwt,
-  );
   Card.find()
     .populate(['owner', 'likes'])
     .then((cards) => {
@@ -20,12 +15,6 @@ const getCards = (req, res, next) => {
 
 //  POST /cards — создаёт карточку
 const createCard = (req, res, next) => {
-  console.log(
-    'POST /cards createCard => req.body, req.user, req.cookies.jwt',
-    req.body,
-    req.user,
-    req.cookies.jwt,
-  );
   const { name, link } = req.body;
   const userId = req.user._id;
 
@@ -41,25 +30,17 @@ const createCard = (req, res, next) => {
 
 //  DELETE /cards/:cardId — удаляет карточку по идентификатору
 const deleteCard = (req, res, next) => {
-  console.log(
-    'DELETE /cards/:cardId deleteCard => req.params, req.user, req.cookies.jwt',
-    req.params,
-    req.user,
-    req.cookies.jwt,
-  );
   const { cardId } = req.params;
 
   Card.findById(cardId)
     .populate(['owner', 'likes'])
     .orFail(() => {
-      console.log('deleteLikeCard => orFail');
       throw new NotFoundError(`Card ${cardId} is not found`);
     })
     .then((card) => {
       if (card.owner._id.toString() === req.user._id.toString()) {
         Card.findByIdAndRemove(cardId)
           .orFail(() => {
-            console.log('deleteLikeCard => orFail');
             throw new NotFoundError(`Card ${cardId} is not found`);
           })
           .then(() => {
@@ -78,12 +59,6 @@ const deleteCard = (req, res, next) => {
 
 //  PUT /cards/:cardId/likes — поставить лайк карточке
 const addLikeCard = (req, res, next) => {
-  console.log(
-    'PUT /cards/:cardId/likes addLikeCard => req.params, req.user, req.cookies.jwt',
-    req.params,
-    req.user,
-    req.cookies.jwt,
-  );
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     cardId,
@@ -92,7 +67,6 @@ const addLikeCard = (req, res, next) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      console.log('addLikeCard => orFail');
       throw new NotFoundError(`Card ${cardId} is not found`);
     })
     .then((card) => {
@@ -106,6 +80,7 @@ const addLikeCard = (req, res, next) => {
 //  DELETE /cards/:cardId/likes — убрать лайк с карточки
 const deleteLikeCard = (req, res, next) => {
   const { cardId } = req.params;
+
   Card.findByIdAndUpdate(
     cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -113,7 +88,6 @@ const deleteLikeCard = (req, res, next) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      console.log('deleteLikeCard => orFail');
       throw new NotFoundError(`Card ${cardId} is not found`);
     })
     .then((card) => {

@@ -11,7 +11,6 @@ function generateToken(payload) {
 
 function checkToken(token) {
   if (!token) {
-    console.log('checkToken => !token', false);
     return false;
   }
   try {
