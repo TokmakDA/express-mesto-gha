@@ -11,14 +11,14 @@ const userSchema = new Schema({
     required: false,
     minlength: 2,
     maxlength: 30,
-    default: 'Jacques-Yves Cousteau',
+    default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
     required: false,
     minlength: 2,
     maxlength: 30,
-    default: 'Ocean explorer',
+    default: 'Исследователь',
   },
   avatar: {
     type: String,
