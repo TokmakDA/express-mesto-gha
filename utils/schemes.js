@@ -5,7 +5,7 @@ const userSchema = {
   about: Joi.string().min(2).max(30),
   avatar: Joi.string().regex(/(https?:\/\/)\w+?(\S+|W+)?(\w+)?.\w{2,15}\/?/),
   email: Joi.string().email().required(),
-  password: Joi.string().min(8).strip().required(),
+  password: Joi.string().min(8).required(),
 };
 
 const cardSchema = {

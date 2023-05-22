@@ -1,7 +1,7 @@
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
 const { NotFoundError } = require('../errors/errors');
 const { generateToken } = require('../utils/token');
-const { hashPassword } = require('../utils/hash');
 
 //  GET /users — возвращает всех пользователей
 const getUsers = (req, res, next) => {
@@ -117,10 +117,11 @@ const createUser = (req, res, next) => {
   const {
     email,
     password,
-    name, about,
+    name,
+    about,
     avatar,
   } = req.body;
-  hashPassword(password)
+  bcrypt.hash(password, 10)
     .then((hash) => {
       User.create({
         email,
