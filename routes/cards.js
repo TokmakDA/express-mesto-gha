@@ -1,6 +1,6 @@
 const express = require('express');
 const { celebrate } = require('celebrate');
-const { cardSchema, cardIdSchema } = require('../utils/schemes');
+const { cardSchema, cardIdSchema } = require('../utils/validationSchemes');
 const {
   getCards,
   createCard,

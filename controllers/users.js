@@ -7,11 +7,9 @@ const { generateToken } = require('../utils/token');
 const getUsers = (req, res, next) => {
   User.find()
     .then((users) => {
-      res.status(200).json({ data: users });
+      res.json({ data: users });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 //  GET /users/:userId - возвращает пользователя по _id
@@ -23,11 +21,9 @@ const getUser = (req, res, next) => {
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
-      res.status(200).send({ data: user });
+      res.json({ data: user });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 //  GET /users/me - возвращает информацию о текущем пользователе
@@ -40,7 +36,7 @@ const getUserMe = (req, res, next) => {
     })
     .then((user) => {
       // выбираем поля для передачи пользователю
-      res.status(200).json({
+      res.json({
         data: {
           _id: user._id,
           name: user.name,
@@ -50,9 +46,7 @@ const getUserMe = (req, res, next) => {
         },
       });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 //  POST /signin — авторизует пользователя
@@ -81,9 +75,12 @@ const login = (req, res, next) => {
           },
         }); // вернем данные
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
+};
+
+//  GET /signup — очищает куки
+const signout = (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Exit' });
 };
 
 //  POST /signup — создаёт пользователя
@@ -118,12 +115,14 @@ const createUser = (req, res, next) => {
           }); // вернем данные
         })
         .catch((err) => {
-          next(err);
+          if (err.code === 11000) {
+            next(new ConflictError('the user already exists'));
+          } else {
+            next(err);
+          }
         });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 // PATCH /users/me — обновляет профиль
@@ -143,7 +142,7 @@ const patchUser = (req, res, next) => {
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
-      res.status(200).json({
+      res.json({
         data: {
           _id: user._id,
           name: user.name,
@@ -153,9 +152,7 @@ const patchUser = (req, res, next) => {
         },
       });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 // PATCH /users/me/avatar — обновляет аватар
@@ -175,7 +172,7 @@ const patchAvatar = (req, res, next) => {
       throw new NotFoundError(`User ${userId} is not found`);
     })
     .then((user) => {
-      res.status(200).json({
+      res.json({
         data: {
           _id: user._id,
           name: user.name,
@@ -185,9 +182,7 @@ const patchAvatar = (req, res, next) => {
         },
       });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 module.exports = {
@@ -195,6 +190,7 @@ module.exports = {
   getUser,
   getUserMe,
   login,
+  signout,
   createUser,
   patchUser,
   patchAvatar,

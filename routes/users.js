@@ -1,6 +1,6 @@
 const express = require('express');
 const { celebrate } = require('celebrate');
-const { userSchemaUpdate, userIdSchema } = require('../utils/schemes');
+const { userSchemaUpdate, userIdSchema } = require('../utils/validationSchemes');
 const {
   getUsers,
   getUser,

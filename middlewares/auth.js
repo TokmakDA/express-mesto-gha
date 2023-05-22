@@ -3,11 +3,11 @@ const { checkToken } = require('../utils/token');
 
 module.exports = async (req, res, next) => {
   const token = req.cookies.jwt;
-  const err = new UnauthorizedError('Unauthorized Error');
+  const newErr = new UnauthorizedError('login error');
 
   // убеждаемся, что токен присутсвует
   if (!token) {
-    next(err);
+    next(newErr);
     return;
   }
 
@@ -15,8 +15,8 @@ module.exports = async (req, res, next) => {
   try {
     const payload = await checkToken(token);
     req.user = { _id: payload._id };
-  } catch (e) {
-    next(err);
+  } catch (err) {
+    next(newErr);
   }
   next(); // пропускаем запрос дальше
 };
