@@ -9,7 +9,7 @@ const { UnauthorizedError } = require('./UnauthorizedError');
 // Вернуть ошибку пользователю
 const returnErrorToUser = (err, req, res, next) => {
   res.status(err.statusCode).send({ message: err.message }).end();
-  next()
+  next();
 };
 
 function handleError(err, req, res, next) {
@@ -24,7 +24,6 @@ function handleError(err, req, res, next) {
     const message = Object.values(err.errors)
       .map((error) => error.message)
       .join('; ');
-    // 
     const newErr = new BadRequestError(message);
     returnErrorToUser(newErr, req, res);
   } else if (err.message === 'Validation failed') {

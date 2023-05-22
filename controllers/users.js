@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
-const { NotFoundError } = require('../errors/errors');
+const { NotFoundError, ConflictError } = require('../errors/errors');
 const { generateToken } = require('../utils/token');
 
 //  GET /users — возвращает всех пользователей
