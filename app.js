@@ -23,7 +23,7 @@ app.post('/signin', login);
 app.post(
   '/signup',
   celebrate({
-    body: Joi.object().keys({ userSchema }).unknown(true),
+    body: Joi.object().keys(userSchema).unknown(true),
   }),
   createUser,
 );
